@@ -120,3 +120,8 @@ dump.*
 
 # BERT
 nlp/model/
+
+# Several metadata
+.idea/
+.jupyter/
+.local/
