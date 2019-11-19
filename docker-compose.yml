@@ -1,4 +1,4 @@
-version: '3.1'
+version: '3.7'
 services:
 
   vaenotebook:
@@ -7,7 +7,9 @@ services:
       context: .
       dockerfile: ./src/notebook/Dockerfile
     volumes:
-      - ./src/notebook/:/home/me
+      - ./src/notebook/:/workspace
+      - ./assets/data/:/workspace/data
     ports:
       - "8888:8888"
+      - "6006:6006"
     user: ${CURRENT_UID}

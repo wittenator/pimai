@@ -114,13 +114,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Dumps
-nlp/dumps/*.json
-dump.*
-
-# BERT
-nlp/model/
-
 # Several metadata
 .idea/
 .jupyter/
