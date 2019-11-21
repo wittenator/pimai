@@ -12,7 +12,7 @@ RUN /opt/conda/bin/conda install --use-local -y nodejs Cython tensorflow pandas 
     /opt/conda/bin/conda install --use-local -c conda-forge tensorboardx && \
     /opt/conda/bin/conda clean -ya
 
-RUN jupyter labextension install jupyterlab_tensorboard
+#RUN jupyter labextension install jupyterlab_tensorboard
 
 RUN pip install --user jupyter_tensorboard torchvision scikit-image
 
