@@ -23,7 +23,7 @@ EXPOSE 8888
 
 RUN chmod -R 1777 /home/me
 
-CMD tensorboard --logdir /data/runs --bind_all & jupyter lab --no-browser --ip=0.0.0.0 --port=8888
+CMD tensorboard --logdir /data/runs --bind_all & jupyter lab --no-browser --allow-root --ip=0.0.0.0 --port=8888
 
 
 

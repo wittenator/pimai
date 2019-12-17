@@ -118,3 +118,5 @@ dmypy.json
 .idea/
 .jupyter/
 .local/
+
+.data/
