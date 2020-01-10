@@ -9,12 +9,15 @@ RUN mkdir -p /home/me && chmod 1777 /home/me
 ENV HOME="/home/me"
 
 
-RUN /opt/conda/bin/conda install --use-local -y nodejs Cython tensorflow pandas scikit-learn matplotlib seaborn jupyter jupyterlab && \
+RUN /opt/conda/bin/conda install --use-local -y nodejs Cython tensorflow pandas scikit-learn matplotlib seaborn jupyter jupyterlab ipympl && \
     /opt/conda/bin/conda clean -ya
+
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
+RUN jupyter labextension install jupyter-matplotlib
 
 WORKDIR /workspace
 
-RUN pip install --user torchvision scikit-image skorch
+RUN pip install --user torchvision scikit-image skorch hypertools
 
 # tensorboard
 EXPOSE 6006
