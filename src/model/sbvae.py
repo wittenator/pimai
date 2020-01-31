@@ -26,7 +26,7 @@ class SBVAE(Autoencoder):
 
     def encode(self, x):
         x = torch.flatten(x, 1)
-        h1 = F.prelu(self.fc1(x))
+        h1 = F.leaky_relu(self.fc1(x))
         return F.softplus(self.fc21(h1)), F.softplus(self.fc22(h1))
 
     def reparameterize(self, a, b):
@@ -51,7 +51,7 @@ class SBVAE(Autoencoder):
         return sticks
 
     def decode(self, z):
-        h3 = F.prelu(self.fc3(z))
+        h3 = F.leaky_relu(self.fc3(z))
         return self.fc4(h3)
 
     def forward(self, x):
