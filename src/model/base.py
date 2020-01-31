@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 
-import hypertools as hyp
+#import hypertools as hyp
 
 
 class Autoencoder(nn.Module):
@@ -67,5 +67,7 @@ class Autoencoder(nn.Module):
             self.embedding_labels = torch.cat(tuple(labels), dim=0).cpu().numpy()
 
     def visualize_embeddings(self, epoch):
-        hyp.plot(self.embeddings[epoch], '.', hue=self.embedding_labels, reduce='TSNE', ndims=2,
-                 save_path=f'{self.save_dir}visualizations/{self.__class__.__name__}-{datetime.now().strftime("%Y%m%d-%H%M%S")}.svg' if not colab else None)
+         pass
+#        hyp.plot(self.embeddings[epoch], '.', hue=self.embedding_labels, reduce='TSNE', ndims=2,
+#                 save_path=f'{self.save_dir}visualizations/{self.__class__.__name__}-{datetime.now().strftime("%Y%m%d-%H%M%S")}.svg' if not colab else None)
+
