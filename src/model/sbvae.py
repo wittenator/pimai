@@ -26,7 +26,7 @@ class SBVAE(Autoencoder):
 
     def encode(self, x):
         x = torch.flatten(x, 1)
-        h1 = F.relu(self.fc1(x))
+        h1 = F.prelu(self.fc1(x))
         return F.softplus(self.fc21(h1)), F.softplus(self.fc22(h1))
 
     def reparameterize(self, a, b):
@@ -51,7 +51,7 @@ class SBVAE(Autoencoder):
         return sticks
 
     def decode(self, z):
-        h3 = F.relu(self.fc3(z))
+        h3 = F.prelu(self.fc3(z))
         return self.fc4(h3)
 
     def forward(self, x):
@@ -91,6 +91,8 @@ class SBVAE(Autoencoder):
         period = 20
         BCE = F.binary_cross_entropy_with_logits(recon_x, x.view(-1, 784), reduction='none')
         KLD = self.KLD(a, b, prior_alpha, prior_beta)
+        self.writer.add_scalar('KLD/train', KLD.sum())
+        self.writer.add_scalar('BCE/train', BCE.sum())
 
         return 60000 / a.size(0) * torch.mean(
             1 / period * (epoch % period) * KLD.sum(axis=1) + BCE.sum(axis=1))
