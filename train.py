@@ -36,12 +36,12 @@ optimizer.add_argument('--learning-rate', type=float, default=.0003,
                        help="the AdaM learning rate (alpha) parameter. Default:%(default)s")
 
 general = p.add_argument_group("General arguments")
-general.add_argument('--save-dir', default="./",
+general.add_argument('--save-dir', default="./assets/",
                      help='name of the folder where to save the experiment. Default: %(default)s.')
 
 args = p.parse_args()
 
-device, train_loader, test_loader, train_loader_occluded, test_loader_occluded = build_dataset()
+device, train_loader, test_loader, train_loader_occluded, test_loader_occluded = build_dataset(args.save_dir)
 
 if args.model == 'vae':
     model = VAE(device, args.save_dir, k=args.latent_size).to(device)
@@ -62,6 +62,6 @@ for epoch in range(1, epochs + 1):
     model.tests(device, test_loader if args.model != 'sssbvae' else test_loader_occluded, epoch, epochs)
     #scheduler.step()
     model.add_embedding(test_loader)
-torch.save(model.state_dict(), f'{args.save_dir}model.pth')
+torch.save(model.state_dict(), f'{args.save_dir}data/{args.model}-{args.max_epoch}-{args.latent_size}.pth')
 
 

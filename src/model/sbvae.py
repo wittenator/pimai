@@ -88,11 +88,12 @@ class SBVAE(Autoencoder):
         return kl
 
     def loss_function(self, recon_x, x, a, b, prior_alpha, prior_beta, epoch, epochs):
+        self.counter += 1
         period = 20
         BCE = F.binary_cross_entropy_with_logits(recon_x, x.view(-1, 784), reduction='none')
         KLD = self.KLD(a, b, prior_alpha, prior_beta)
-        self.writer.add_scalar('KLD/train', KLD.sum())
-        self.writer.add_scalar('BCE/train', BCE.sum())
+        self.writer.add_scalar('KLD/train', KLD.sum(), self.counter)
+        self.writer.add_scalar('BCE/train', BCE.sum(), self.counter)
 
         return 60000 / a.size(0) * torch.mean(
             1 / period * (epoch % period) * KLD.sum(axis=1) + BCE.sum(axis=1))

@@ -15,9 +15,10 @@ class Autoencoder(nn.Module):
         self.save_dir = save_dir
         now = datetime.now()
         current_time = now.strftime("%Y%m%d-%H%M%S")
-        self.writer = SummaryWriter(log_dir=self.save_dir + current_time)
+        self.writer = SummaryWriter(log_dir=self.save_dir + 'data/runs/' + current_time)
         self.embeddings = []
         self.embedding_labels = []
+        self.counter = 0
 
     def trains(self, device, train_loader, optimizer, epoch, epochs):
         self.train()
@@ -33,7 +34,7 @@ class Autoencoder(nn.Module):
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, batch_idx * len(data), len(train_loader.dataset),
                            100. * batch_idx / len(train_loader), loss.item()))
-            self.writer.add_scalar('Loss/train', loss.item(), epoch * len(train_loader) + batch_idx)
+            self.writer.add_scalar('Loss/train', loss.item(), self.counter)
 
     def tests(self, device, test_loader, epoch, epochs):
         self.eval()
