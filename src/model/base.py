@@ -4,6 +4,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+import pandas as pd
+import os
 
 #import hypertools as hyp
 
@@ -71,4 +76,33 @@ class Autoencoder(nn.Module):
          pass
 #        hyp.plot(self.embeddings[epoch], '.', hue=self.embedding_labels, reduce='TSNE', ndims=2,
 #                 save_path=f'{self.save_dir}visualizations/{self.__class__.__name__}-{datetime.now().strftime("%Y%m%d-%H%M%S")}.svg' if not colab else None)
+
+    def knn_accuracy(self, epoch):
+
+        X_train,X_test,y_train,y_test = train_test_split(np.asarray(self.embeddings[-1]), self.embedding_labels, test_size=0.99)
+
+        knn_3 = KNeighborsClassifier(n_neighbors=3)
+        knn_5 = KNeighborsClassifier(n_neighbors=5)
+        knn_10 = KNeighborsClassifier(n_neighbors=10)
+
+        knn_3.fit(X_train,y_train)
+        pred_3 = knn_3.predict(X_test)
+
+        knn_5.fit(X_train,y_train)
+        pred_5 = knn_5.predict(X_test)
+
+        knn_10.fit(X_train,y_train)
+        pred_10 = knn_10.predict(X_test)
+
+        d = {'k=3': [accuracy_score(y_test, pred_3)], 'k=5': [accuracy_score(y_test, pred_5)], 'k=10': [accuracy_score(y_test, pred_10)]}
+
+        df = pd.DataFrame(data=d)
+        df.rename(index={0:self.name}, inplace=True)
+
+        if not os.path.isfile('results/test_error.csv'):
+
+            df.to_csv('results/test_error.csv', header='column_names')
+
+        else:
+            df.to_csv('results/test_error.csv', header=False)
 
