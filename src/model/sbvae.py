@@ -41,6 +41,8 @@ class SBVAE(Autoencoder):
         # value for Kumaraswamy distribution
         km = (1 - uniform_samples.pow(exp_b) + eps).pow(exp_a)
 
+        self.name = 'SB-VAE (K)'
+
         # no Nans are allowed in the matrix
         # assert not torch.isnan(km).any().item()
 

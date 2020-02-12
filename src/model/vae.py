@@ -30,6 +30,7 @@ class VAE(Autoencoder):
         return self.fc21(h1), self.fc22(h1)
 
     def reparameterize(self, mu, logvar):
+        self.name = 'Gauss VAE'
         std = torch.exp(0.5 * logvar)
         eps = torch.randn_like(std)
         return mu + eps * std
