@@ -9,17 +9,21 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import pandas as pd
 import os
+import math
+
 
 #import hypertools as hyp
 
 
 class Autoencoder(nn.Module):
-    def __init__(self, device, save_dir):
+    def __init__(self, device, save_dir, warmup_method, warmup_period):
         super(Autoencoder, self).__init__()
         self.device = device
         self.save_dir = save_dir
         now = datetime.now()
         current_time = now.strftime("%Y%m%d-%H%M%S")
+        self.warmup_method = warmup_method
+        self.warmup_period = warmup_period
         self.writer = SummaryWriter(log_dir=self.save_dir + 'data/runs/' + current_time)
         self.embeddings = []
         self.embedding_labels = []
@@ -58,6 +62,17 @@ class Autoencoder(nn.Module):
 
         print('\nTest set: Average loss: {:.4f}, Reconstruction error: {}\n'.format(
             test_loss, recon))
+
+    def sigmoid(self, x):
+        return 1 / (1 + math.exp(-x))
+
+    def kld_warmup(self, epoch, epochs):
+        if self.warmup_method == 'none':
+            return 1
+        elif self.warmup_method == 'sigmoid':
+            return self.sigmoid(epoch / (self.warmup_period*0.3))
+        else:
+            return self.sigmoid((epoch % self.warmup_period) / (self.warmup_period*0.3))
 
     def add_embedding(self, loader):
         with torch.no_grad():

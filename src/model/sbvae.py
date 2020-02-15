@@ -7,12 +7,19 @@ from torch.distributions import Uniform
 import numpy as np
 
 from .base import Autoencoder
-from src.util import Distributions
+from src.util.Distributions import Distributions
 
+from enum import Enum
+
+class Distributions(Enum):
+    KUMARASWAMY = "km"
+    GAUSS_LOGIT = "gl"
+    GAMMA_DIST = "gamma"
 
 class SBVAE(Autoencoder):
-    def __init__(self, device, save_dir, k=50, dist=Distributions.KUMARASWAMY):
-        super(SBVAE, self).__init__(device, save_dir)
+    def __init__(self, device, save_dir, warmup_method, warmup_period, k=50, dist=Distributions.KUMARASWAMY):
+        super(SBVAE, self).__init__(device, save_dir, warmup_method, warmup_period)
+        self.name = 'SB-VAE'
         self.k = k
         self.device = device
         self.fc1 = nn.Linear(784, 400)
@@ -34,33 +41,25 @@ class SBVAE(Autoencoder):
         return F.softplus(self.fc21(h1)), F.softplus(self.fc22(h1))
 
     def reparameterize(self, a, b):
-        eps = 10 * torch.finfo(torch.float).eps  # smalles representable number such that 1.0 + eps != 1.0
-        batch_size = a.size()[0]
+        eps = 5 * torch.finfo(torch.float).eps 
+        batch_size = a.size(0)
 
-        uniform_samples = Uniform(torch.tensor([eps]), torch.tensor([1.0 - eps])).rsample(a.size()).squeeze().to(
-            self.device) if self.device.type == 'cpu' else torch.cuda.FloatTensor(a.size(0),
-                                                                                  a.size(1)).uniform_().clamp(eps,
-                                                                                                              1.0 - eps)
-        exp_a = torch.reciprocal(
-            a)  # returns a new tensor with the reciprocal of the elements of input: out_i = 1/input_i
-        exp_b = torch.reciprocal(b)
+        uniform_samples = Uniform(torch.tensor([0.0]), torch.tensor([1.0])).rsample(a.size()).squeeze().to(
+            self.device) if self.device.type == 'cpu' else torch.cuda.FloatTensor(*a.size()).uniform_()
+        exp_a = torch.reciprocal(a.clamp(eps))
+        exp_b = torch.reciprocal(b.clamp(eps))
         # value for Kumaraswamy distribution
         if self.dist == Distributions.KUMARASWAMY:
-            km = (1 - uniform_samples.pow(exp_b) + eps).pow(exp_a)
+            km = ((1 - uniform_samples.pow(exp_b)).clamp(eps, 1-eps)).pow(exp_a)
         elif self.dist == Distributions.GAMMA_DIST:
             # exp(lgamma(a)) == gamma(a) https://discuss.pytorch.org/t/is-there-a-gamma-function-in-pytorch/17122/2
             gamma_func = torch.lgamma(a).exp()
-            km = ((uniform_samples * a * gamma_func).pow(exp_a)) / b
+            km = ((uniform_samples * a * gamma_func).pow(exp_a) * exp_b)
         else:
             std = torch.exp(0.5 * b)
-            eps = torch.randn_like(std)
-            gauss = a + eps * std
-            return 1 / 1 - gauss.exp()
-
-        self.name = 'SB-VAE (K)'
-
-        # no Nans are allowed in the matrix
-        # assert not torch.isnan(km).any().item()
+            eps = torch.randn_like(std) if self.device.type == 'cpu' else torch.cuda.FloatTensor(*a.size()).normal_()
+            km = F.sigmoid(a + eps * std)
+        print(torch.min(km), torch.max(km))
 
         # concatenates the given sequence of seq tensors in the given dimension. All tensors must either have the same shape (except in the concatenating dimension) or be empty.
         cumprods = torch.cat((torch.ones([batch_size, 1], device=self.device), torch.cumprod(1 - km, axis=1)), dim=1)
@@ -81,7 +80,10 @@ class SBVAE(Autoencoder):
         return torch.exp(torch.lgamma(a) + torch.lgamma(b) - torch.lgamma(a + b))
 
     def KLD(self, a, b, prior_alpha, prior_beta):
-        ab = (a * b)
+        eps = 5 * torch.finfo(torch.float).eps 
+        a = a.clamp(eps)
+        a = a.clamp(eps)
+        ab = (a * b) + eps
         kl = 1 / (1 + ab) * self.Beta(1 / a, b)
         kl += 1 / (2 + ab) * self.Beta(2 / a, b)
         kl += 1 / (3 + ab) * self.Beta(3 / a, b)
@@ -107,14 +109,12 @@ class SBVAE(Autoencoder):
 
     def loss_function(self, recon_x, x, a, b, prior_alpha, prior_beta, epoch, epochs):
         self.counter += 1
-        period = 20
         BCE = F.binary_cross_entropy_with_logits(recon_x, x.view(-1, 784), reduction='none')
-        KLD = self.KLD(a, b, prior_alpha, prior_beta)
+        KLD = self.kld_warmup(epoch, epochs) * self.KLD(a, b, prior_alpha, prior_beta)
         self.writer.add_scalar('KLD/train', KLD.sum(), self.counter)
         self.writer.add_scalar('BCE/train', BCE.sum(), self.counter)
 
-        return 60000 / a.size(0) * torch.mean(
-            1 / period * (epoch % period) * KLD.sum(axis=1) + BCE.sum(axis=1))
+        return 60000 / a.size(0) * torch.mean(KLD.sum(axis=1) + BCE.sum(axis=1))
 
     def compute_loss_train(self, data, target, epoch, epochs):
         recon_batch, a, b = self(data)
