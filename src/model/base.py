@@ -68,7 +68,6 @@ class Autoencoder(nn.Module):
             self.embedding_labels = torch.cat(tuple(labels), dim=0).cpu().numpy()
 
     def visualize_embeddings(self, epoch):
-         pass
-#        hyp.plot(self.embeddings[epoch], '.', hue=self.embedding_labels, reduce='TSNE', ndims=2,
-#                 save_path=f'{self.save_dir}visualizations/{self.__class__.__name__}-{datetime.now().strftime("%Y%m%d-%H%M%S")}.svg' if not colab else None)
+        hyp.plot(self.embeddings[epoch], '.', hue=self.embedding_labels, reduce='TSNE', ndims=2,
+        save_path=f'{self.save_dir}visualizations/{self.__class__.__name__}-{datetime.now().strftime("%Y%m%d-%H%M%S")}.svg' if not colab else None)
 
