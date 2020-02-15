@@ -50,7 +50,7 @@ class SBVAE(Autoencoder):
         exp_b = torch.reciprocal(b.clamp(eps))
         # value for Kumaraswamy distribution
         if self.dist == Distributions.KUMARASWAMY:
-            km = (1 - uniform_samples.pow(exp_b).clamp(eps, 1-eps)).pow(exp_a).clamp(eps, 1-eps)
+            km = (1 - uniform_samples.pow(exp_b).clamp(eps, 1-eps)).pow(exp_a)
         elif self.dist == Distributions.GAMMA_DIST:
             # exp(lgamma(a)) == gamma(a) https://discuss.pytorch.org/t/is-there-a-gamma-function-in-pytorch/17122/2
             gamma_func = torch.lgamma(a).exp()

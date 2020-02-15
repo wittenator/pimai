@@ -57,12 +57,12 @@ elif args.model == 'sbvae':
 elif args.model == 'sbvae':
     model = SSSBVAE(device, args.save_dir, args.warmup_method, args.warmup_period, k=args.latent_size).to(device)
 
-optimizer = optim.Adam(model.parameters(), lr=args.learning_rate*10)
+optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
 model.writer.add_graph(model, next(iter(train_loader))[0].to(device))
 
 
 
-scheduler = MultiStepLR(optimizer, milestones=[1,2], gamma=0.1)
+scheduler = MultiStepLR(optimizer, milestones=[1], gamma=0.1)
 epochs = args.max_epoch
 for epoch in range(1, epochs + 1):
     model.trains(device, train_loader if args.model != 'sssbvae' else train_loader_occluded, optimizer, epoch, epochs)
