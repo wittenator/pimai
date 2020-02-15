@@ -7,7 +7,7 @@ from src.model.sbvae import SBVAE
 from src.model.sssbvae import SSSBVAE
 
 import torch
-from torch.optim.lr_scheduler import StepLR
+from torch.optim.lr_scheduler import MultiStepLR
 import torch.optim as optim
 
 DESCRIPTION = ("Train a VAE, SBVAE or a SSSBVAE using Pytorch.")
@@ -38,7 +38,7 @@ training.add_argument('--max-epoch', type=int, metavar='N', default=2000,
                       help='train for a maximum of N epochs. Default: %(default)s')
 
 optimizer = p.add_argument_group("AdaM Options")
-optimizer.add_argument('--learning-rate', type=float, default=.0003,
+optimizer.add_argument('--learning-rate', type=float, default=.003,
                        help="the AdaM learning rate (alpha) parameter. Default:%(default)s")
 
 general = p.add_argument_group("General arguments")
@@ -57,12 +57,12 @@ elif args.model == 'sbvae':
 elif args.model == 'sbvae':
     model = SSSBVAE(device, args.save_dir, args.warmup_method, args.warmup_period, k=args.latent_size).to(device)
 
-optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
+optimizer = optim.Adam(model.parameters(), lr=args.learning_rate*10)
 model.writer.add_graph(model, next(iter(train_loader))[0].to(device))
 
 
 
-scheduler = StepLR(optimizer, step_size=1)
+scheduler = MultiStepLR(optimizer, milestones=[1,2], gamma=0.1)
 epochs = args.max_epoch
 for epoch in range(1, epochs + 1):
     model.trains(device, train_loader if args.model != 'sssbvae' else train_loader_occluded, optimizer, epoch, epochs)

@@ -39,7 +39,7 @@ class Autoencoder(nn.Module):
             loss.backward()
             optimizer.step()
             loss_sum += loss.item()
-            if batch_idx % 10 == 0:
+            if batch_idx % 100 == 0:
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, batch_idx * len(data), len(train_loader.dataset),
                            100. * batch_idx / len(train_loader), loss.item()))

@@ -41,16 +41,16 @@ class SBVAE(Autoencoder):
         return F.softplus(self.fc21(h1)), F.softplus(self.fc22(h1))
 
     def reparameterize(self, a, b):
-        eps = 5 * torch.finfo(torch.float).eps 
+        eps = 10 * torch.finfo(torch.float).eps 
         batch_size = a.size(0)
 
-        uniform_samples = Uniform(torch.tensor([0.0]), torch.tensor([1.0])).rsample(a.size()).squeeze().to(
+        uniform_samples = Uniform(torch.tensor([eps]), torch.tensor([1.0 - eps])).rsample(a.size()).squeeze().to(
             self.device) if self.device.type == 'cpu' else torch.cuda.FloatTensor(*a.size()).uniform_()
         exp_a = torch.reciprocal(a.clamp(eps))
         exp_b = torch.reciprocal(b.clamp(eps))
         # value for Kumaraswamy distribution
         if self.dist == Distributions.KUMARASWAMY:
-            km = ((1 - uniform_samples.pow(exp_b)).clamp(eps, 1-eps)).pow(exp_a)
+            km = (1 - uniform_samples.pow(exp_b).clamp(eps, 1-eps)).pow(exp_a).clamp(eps, 1-eps)
         elif self.dist == Distributions.GAMMA_DIST:
             # exp(lgamma(a)) == gamma(a) https://discuss.pytorch.org/t/is-there-a-gamma-function-in-pytorch/17122/2
             gamma_func = torch.lgamma(a).exp()
