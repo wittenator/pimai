@@ -59,7 +59,6 @@ class SBVAE(Autoencoder):
             std = torch.exp(0.5 * b)
             eps = torch.randn_like(std) if self.device.type == 'cpu' else torch.cuda.FloatTensor(*a.size()).normal_()
             km = F.sigmoid(a + eps * std)
-        print(torch.min(km), torch.max(km))
 
         # concatenates the given sequence of seq tensors in the given dimension. All tensors must either have the same shape (except in the concatenating dimension) or be empty.
         cumprods = torch.cat((torch.ones([batch_size, 1], device=self.device), torch.cumprod(1 - km, axis=1)), dim=1)
