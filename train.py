@@ -57,7 +57,7 @@ elif args.model == 'sbvae':
 elif args.model == 'sbvae':
     model = SSSBVAE(device, args.save_dir, args.warmup_method, args.warmup_period, k=args.latent_size).to(device)
 
-optimizer = optim.Adam(model.parameters(), lr=0.003)
+optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
 model.writer.add_graph(model, next(iter(train_loader))[0].to(device))
 
 
@@ -69,6 +69,6 @@ for epoch in range(1, epochs + 1):
     model.tests(device, test_loader if args.model != 'sssbvae' else test_loader_occluded, epoch, epochs)
     scheduler.step()
     model.add_embedding(test_loader)
-torch.save(model.state_dict(), f'{args.save_dir}data/{args.model}-{args.max_epoch}-{args.latent_size}.pth')
+torch.save(model.state_dict(), f'{args.save_dir}data/{args.model}-{args.max_epoch}-{args.latent_size}--{args.warmup_method}--{args.warmup_period}.pth')
 
 
