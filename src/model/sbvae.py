@@ -1,16 +1,17 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 from torch.distributions import Uniform
 
 import numpy as np
 
 from .base import Autoencoder
-
+from src.util import Distributions
 
 
 class SBVAE(Autoencoder):
-    def __init__(self, device, save_dir, k=50):
+    def __init__(self, device, save_dir, k=50, dist=Distributions.KUMARASWAMY):
         super(SBVAE, self).__init__(device, save_dir)
         self.k = k
         self.device = device
@@ -24,6 +25,9 @@ class SBVAE(Autoencoder):
         self.prior_alpha = torch.Tensor([1]).to(device)
         self.prior_beta = torch.Tensor([5]).to(device)
 
+        # Sets the function for DNCP
+        self.dist = dist
+
     def encode(self, x):
         x = torch.flatten(x, 1)
         h1 = F.leaky_relu(self.fc1(x))
@@ -34,12 +38,24 @@ class SBVAE(Autoencoder):
         batch_size = a.size()[0]
 
         uniform_samples = Uniform(torch.tensor([eps]), torch.tensor([1.0 - eps])).rsample(a.size()).squeeze().to(
-            self.device) if self.device.type == 'cpu' else torch.cuda.FloatTensor(a.size(0), a.size(1)).uniform_().clamp(eps, 1.0 - eps)
+            self.device) if self.device.type == 'cpu' else torch.cuda.FloatTensor(a.size(0),
+                                                                                  a.size(1)).uniform_().clamp(eps,
+                                                                                                              1.0 - eps)
         exp_a = torch.reciprocal(
             a)  # returns a new tensor with the reciprocal of the elements of input: out_i = 1/input_i
         exp_b = torch.reciprocal(b)
         # value for Kumaraswamy distribution
-        km = (1 - uniform_samples.pow(exp_b) + eps).pow(exp_a)
+        if self.dist == Distributions.KUMARASWAMY:
+            km = (1 - uniform_samples.pow(exp_b) + eps).pow(exp_a)
+        elif self.dist == Distributions.GAMMA_DIST:
+            # exp(lgamma(a)) == gamma(a) https://discuss.pytorch.org/t/is-there-a-gamma-function-in-pytorch/17122/2
+            gamma_func = torch.lgamma(a).exp()
+            km = ((uniform_samples * a * gamma_func).pow(exp_a)) / b
+        else:
+            std = torch.exp(0.5 * b)
+            eps = torch.randn_like(std)
+            gauss = a + eps * std
+            return 1 / 1 - gauss.exp()
 
         self.name = 'SB-VAE (K)'
 
@@ -106,4 +122,5 @@ class SBVAE(Autoencoder):
 
     def compute_loss_test(self, data, target, epoch, epochs):
         recon_batch, a, b = self(data)
-        return self.loss_function(recon_batch, data, a, b, self.prior_alpha, self.prior_beta, epoch, epochs).item(), recon_batch
+        return self.loss_function(recon_batch, data, a, b, self.prior_alpha, self.prior_beta, epoch,
+                                  epochs).item(), recon_batch

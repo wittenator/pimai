@@ -20,6 +20,8 @@ dataset.add_argument('--label-drop-percentage', type=float, default=.99,
 model = p.add_argument_group("Model options")
 model.add_argument('--model', type=str, default='sbvae',
                    help='Model type to train. Default:%(default)s')
+model.add_argument("--reparametrization", type=str, default="km",
+                   help="Desired Modelreparametrization (km, gamma or gl")
 model.add_argument('--latent-size', type=int, default=50,
                    help='dimensionality of latent variable. Default:%(default)s')
 model.add_argument('--prior-concentration-param', type=float, default=1.,
