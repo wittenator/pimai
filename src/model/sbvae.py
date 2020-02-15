@@ -56,6 +56,9 @@ class SBVAE(Autoencoder):
             eps = torch.randn_like(std)
             gauss = a + eps * std
             return 1 / 1 - gauss.exp()
+
+        self.name = 'SB-VAE (K)'
+
         # no Nans are allowed in the matrix
         # assert not torch.isnan(km).any().item()
 
