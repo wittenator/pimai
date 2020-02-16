@@ -13,7 +13,7 @@ You will need [Docker](https://docs.docker.com/install/), [Docker Compose](https
 #### Running all containers
 
 Important note: 
-The project generates SSL/TLS certificates and passwords if none are found in the subrepo containing the secrets. If the VIA is going to accessed, insert the real password into ```ikoncode_secrets```.
+The project generates SSL/TLS certificates and passwords if none are found in the subrepo containing the secrets
 
 A step by step series of examples that tell you how to get a development env running
 
@@ -31,6 +31,8 @@ bash ./start.sh
 
 ## Authors
 * [Tim Korjakow](https://github.com/wittenator)
+* [Stefan Pawlowski](https://github.com/Stefuniverse)
+* [Laura Mons](https://github.com/eleicha)
 
 
 ## License
