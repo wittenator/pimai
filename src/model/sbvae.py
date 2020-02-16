@@ -9,13 +9,6 @@ import numpy as np
 from .base import Autoencoder
 from src.util.Distributions import Distributions
 
-from enum import Enum
-
-class Distributions(Enum):
-    KUMARASWAMY = "km"
-    GAUSS_LOGIT = "gl"
-    GAMMA_DIST = "gamma"
-
 class SBVAE(Autoencoder):
     def __init__(self, device, save_dir, warmup_method, warmup_period, k=50, dist=Distributions.KUMARASWAMY):
         super(SBVAE, self).__init__(device, save_dir, warmup_method, warmup_period)
@@ -45,9 +38,9 @@ class SBVAE(Autoencoder):
         batch_size = a.size(0)
 
         uniform_samples = Uniform(torch.tensor([eps]), torch.tensor([1.0 - eps])).rsample(a.size()).squeeze().to(
-            self.device) if self.device.type == 'cpu' else torch.cuda.FloatTensor(*a.size()).uniform_()
-        exp_a = torch.reciprocal(a.clamp(eps))
-        exp_b = torch.reciprocal(b.clamp(eps))
+            self.device) if self.device.type == 'cpu' else torch.cuda.FloatTensor(*a.size()).uniform_().clamp(eps, 1 - eps)
+        exp_a = torch.reciprocal(a.clamp(eps)).clamp(eps)
+        exp_b = torch.reciprocal(b.clamp(eps)).clamp(eps)
         # value for Kumaraswamy distribution
         if self.dist == Distributions.KUMARASWAMY:
             km = (1 - uniform_samples.pow(exp_b).clamp(eps, 1-eps)).pow(exp_a)
@@ -81,7 +74,7 @@ class SBVAE(Autoencoder):
     def KLD(self, a, b, prior_alpha, prior_beta):
         eps = 5 * torch.finfo(torch.float).eps 
         a = a.clamp(eps)
-        a = a.clamp(eps)
+        b = b.clamp(eps)
         ab = (a * b) + eps
         kl = 1 / (1 + ab) * self.Beta(1 / a, b)
         kl += 1 / (2 + ab) * self.Beta(2 / a, b)

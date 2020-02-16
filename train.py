@@ -46,7 +46,7 @@ general.add_argument('--save-dir', default="./assets/",
                      help='name of the folder where to save the experiment. Default: %(default)s.')
 
 args = p.parse_args()
-torch.autograd.set_detect_anomaly(True)
+#torch.autograd.set_detect_anomaly(True)
 
 device, train_loader, test_loader, train_loader_occluded, test_loader_occluded = build_dataset(args.save_dir)
 
