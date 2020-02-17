@@ -5,9 +5,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from torch.distributions import Categorical
+from src.util.Distributions import Distributions
 
 class SSSBVAE(SBVAE):
-    def __init__(self, device, save_dir, warmup_method, warmup_period, k=50):
+    def __init__(self, device, save_dir, warmup_method, warmup_period, k=50, dist=Distributions.KUMARASWAMY):
         super(SSSBVAE, self).__init__(device, save_dir, warmup_method, warmup_period, k=k)
 
         self.fc23 = nn.Linear(400, 10)
