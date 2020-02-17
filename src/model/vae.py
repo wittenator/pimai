@@ -8,16 +8,11 @@ class VAE(Autoencoder):
     def __init__(self, device, save_dir, warmup_method, warmup_period, k=20):
         super(VAE, self).__init__(device, save_dir, warmup_method, warmup_period)
 
-        self.conv1 = nn.Conv2d(1, 32, 3, 1)
-        self.conv2 = nn.Conv2d(32, 64, 3, 1)
-        self.dropout1 = nn.Dropout2d(0.25)
-        self.dropout2 = nn.Dropout2d(0.5)
-
-        self.fc1 = nn.Linear(784, 400)
-        self.fc21 = nn.Linear(400, k)
-        self.fc22 = nn.Linear(400, k)
-        self.fc3 = nn.Linear(k, 400)
-        self.fc4 = nn.Linear(400, 784)
+        self.fc1 = nn.Linear(784, 500)
+        self.fc21 = nn.Linear(500, k)
+        self.fc22 = nn.Linear(500, k)
+        self.fc3 = nn.Linear(k, 500)
+        self.fc4 = nn.Linear(500, 784)
 
     def encode(self, x):
         x = torch.flatten(x, 1)
