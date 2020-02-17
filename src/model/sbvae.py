@@ -74,7 +74,7 @@ class SBVAE(Autoencoder):
     def KLD(self, a, b, prior_alpha, prior_beta):
         eps = 5 * torch.finfo(torch.float).eps 
         a = a.clamp(eps)
-        a = a.clamp(eps)
+        b = b.clamp(eps)
         ab = (a * b) + eps
         kl = 1 / (1 + ab) * self.Beta(1 / a, b)
         kl += 1 / (2 + ab) * self.Beta(2 / a, b)
