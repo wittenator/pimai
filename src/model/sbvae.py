@@ -106,7 +106,7 @@ class SBVAE(Autoencoder):
         self.writer.add_scalar('KLD/train', KLD.sum(), self.counter)
         self.writer.add_scalar('BCE/train', BCE.sum(), self.counter)
 
-        return 60000 / a.size(0) * torch.mean(KLD.sum(axis=1) + BCE.sum(axis=1))
+        return 60000 / a.size(0) * (torch.mean(KLD.sum(axis=1) + BCE.sum(axis=1)))
 
     def compute_loss_train(self, data, target, epoch, epochs):
         recon_batch, a, b = self(data)
