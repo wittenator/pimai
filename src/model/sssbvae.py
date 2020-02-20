@@ -8,7 +8,7 @@ from torch.distributions import Categorical
 from src.util.Distributions import Distributions
 
 class SSSBVAE(SBVAE):
-    def __init__(self, device, save_dir, warmup_method, warmup_period, k=50, dist=Distributions.KUMARASWAMY):
+    def __init__(self, device, save_dir, warmup_method, warmup_period, k=50, dist="km"):
         super(SSSBVAE, self).__init__(device, save_dir, warmup_method, warmup_period, k=k)
 
         self.fc23 = nn.Linear(500, 10)
@@ -41,7 +41,7 @@ class SSSBVAE(SBVAE):
         factor = torch.where(y_true != -1, torch.ones(a.size(0), device=self.device),
                              F.binary_cross_entropy(y_batch, eye_batch, reduction='none').sum(axis=(1, 2)))
 
-        term = kld_warmup(epoch, epochs)* KLD.sum(axis=1) + BCE.sum(axis=1) * factor + y_recon
+        term = self.kld_warmup(epoch, epochs)* KLD.sum(axis=1) + BCE.sum(axis=1) * factor + y_recon
 
         return 60000 / a.size(0) * (torch.mean(term))
 
