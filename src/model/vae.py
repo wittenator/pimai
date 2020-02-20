@@ -42,7 +42,7 @@ class VAE(Autoencoder):
         # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
         # https://arxiv.org/abs/1312.6114
         # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
-        KLD = self.kld_warmup(epoch, epochs)(-0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()))
+        KLD = self.kld_warmup(epoch, epochs)*(-0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()))
         self.writer.add_scalar('KLD/train', KLD.sum(), self.counter)
         self.writer.add_scalar('BCE/train', BCE.sum(), self.counter)
 
