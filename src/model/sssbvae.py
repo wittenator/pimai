@@ -11,8 +11,8 @@ class SSSBVAE(SBVAE):
     def __init__(self, device, save_dir, warmup_method, warmup_period, k=50, dist=Distributions.KUMARASWAMY):
         super(SSSBVAE, self).__init__(device, save_dir, warmup_method, warmup_period, k=k)
 
-        self.fc23 = nn.Linear(400, 10)
-        self.fc3 = nn.Linear(self.k + 10, 400)
+        self.fc23 = nn.Linear(500, 10)
+        self.fc3 = nn.Linear(self.k + 10, 500)
 
     def encode(self, x):
         x = torch.flatten(x, 1)
