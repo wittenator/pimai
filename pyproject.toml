@@ -5,13 +5,10 @@ description = ""
 authors = ["wittenator <wittenator@yahoo.de>"]
 
 [tool.poetry.dependencies]
-python = "^3.6"
-gradient = "^0.5.1"
-tensorboard = "^2.1"
+python = "^3.8"
+cython = "^0.29.16"
 hypertools = "^0.6.2"
-plotly = "^4.5"
-psutil = "^5.7"
-requests = "^2.23"
+tensorboard = "^2.2.1"
 
 [tool.poetry.dev-dependencies]
 

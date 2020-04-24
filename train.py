@@ -14,7 +14,8 @@ import torch.optim as optim
 def train(save_dir='./assets/', model='sbvae', learning_rate=0.003, max_epoch=1000, warmup_method='cycle', warmup_period=50, latent_size=50, reparametrization="km", **kwargs):
     device, train_loader, test_loader, train_loader_occluded, test_loader_occluded = build_dataset(save_dir)
     modeltype = model
-    name = f'{modeltype}-{max_epoch}-{latent_size}--{warmup_method}--{warmup_period}--{reparametrization}-'
+    name = f'{modeltype}-{max_epoch}-{latent_size}--{warmup_method}--{warmup_period}--{reparametrization}'
+    os.makedirs(f'{save_dir}data/{name}/', exist_ok=True)
     if model == 'vae':
         model = VAE(device, save_dir + 'data/runs/' + name, warmup_method, warmup_period, k=latent_size).to(device)
     elif model == 'sbvae':
@@ -30,11 +31,12 @@ def train(save_dir='./assets/', model='sbvae', learning_rate=0.003, max_epoch=10
     #scheduler = MultiStepLR(optimizer, milestones=[1], gamma=0.1)
     epochs = max_epoch
     for epoch in range(1, epochs + 1):
+        name_epoch = f'{modeltype}-{epoch}-{latent_size}--{warmup_method}--{warmup_period}--{reparametrization}'
         model.trains(device, train_loader if model != 'sssbvae' else train_loader_occluded, optimizer, epoch, epochs)
         model.tests(device, test_loader if model != 'sssbvae' else test_loader_occluded, epoch, epochs)
         #scheduler.step()
-    os.makedirs(f'{save_dir}data/{name}/', exist_ok=True)
-    torch.save(model.state_dict(), f'{save_dir}data/{name}/{name}.pth')
+        if epoch in [1, 10, 100, 250, 500, 1000, max_epoch]:
+            torch.save(model.state_dict(), f'{save_dir}data/{name}/{name_epoch}.pth')
     model.add_embedding(test_loader)
     model.visualize_embeddings(-1, f'{save_dir}data/{name}')
 

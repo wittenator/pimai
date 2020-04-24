@@ -104,4 +104,4 @@ venv.bak/
 .mypy_cache/
 
 # data
-assets/data/MNIST
+assets/
