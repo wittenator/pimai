@@ -11,7 +11,8 @@ import torch
 from torch.optim.lr_scheduler import MultiStepLR
 import torch.optim as optim
 
-def train(save_dir='./assets/', model='sbvae', learning_rate=0.003, max_epoch=1000, warmup_method='cycle', warmup_period=50, latent_size=50, reparametrization="km", **kwargs):
+def train(save_dir='./assets/', model='sbvae', learning_rate=0.0003, max_epoch=1000, warmup_method='cycle', warmup_period=50, latent_size=50, reparametrization="km", **kwargs):
+    learning_rate = learning_rate if reparametrization != 'gl' else learning_rate*50
     device, train_loader, test_loader, train_loader_occluded, test_loader_occluded = build_dataset(save_dir)
     modeltype = model
     name = f'{modeltype}-{max_epoch}-{latent_size}--{warmup_method}--{warmup_period}--{reparametrization}'

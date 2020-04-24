@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from torch.distributions import Uniform, Beta, Gamma, Normal, Independent
+from torch.distributions import Uniform, Beta, Gamma, Normal, Independent, LogisticNormal
 
 import numpy as np
 
@@ -70,9 +70,8 @@ class SBVAE(Autoencoder):
         return (uniform_samples * a * gamma_func).clamp(eps, 1-eps).pow(exp_a) * exp_b
 
     def gausslogit(self, uniform_samples, a, b, eps):
-        std = torch.exp(0.5 * b)
-        eps_g = torch.randn_like(std) if self.device.type == 'cpu' else torch.cuda.FloatTensor(*std.size()).normal_()
-        return torch.sigmoid(a + eps_g * std)
+        eps_g = torch.randn_like(a) if self.device.type == 'cpu' else torch.cuda.FloatTensor(*a.size()).normal_()
+        return torch.sigmoid(a + eps_g * b)
 
     def decode(self, z):
         h3 = F.relu(self.fc3(z))
@@ -115,9 +114,9 @@ class SBVAE(Autoencoder):
         elif self.dist == "gamma":
             kl = torch.distributions.kl.kl_divergence(Gamma(a, b), Gamma(prior_alpha, prior_beta))
         elif self.dist == "gl":
-            prior_alpha = prior_alpha/(prior_alpha + prior_beta)
-            prior_beta =  torch.sqrt(prior_alpha*prior_beta / ((prior_alpha + prior_beta)**2*(prior_alpha + prior_beta + 1)))
-            kl = torch.distributions.kl.kl_divergence(Independent(Normal(a, b),1), Independent(Normal(prior_alpha, prior_beta),1)).unsqueeze(1)
+            prior_alpha_beta = prior_alpha/(prior_alpha + prior_beta)
+            prior_beta_beta =  torch.sqrt(prior_alpha*prior_beta / ((prior_alpha + prior_beta)**2*(prior_alpha + prior_beta + 1)))
+            kl = torch.distributions.kl.kl_divergence(Independent(Normal(a, b),1), Independent(Normal(prior_alpha_beta, prior_beta_beta),1)).unsqueeze(1)
         return kl
 
     def loss_function(self, recon_x, x, a, b, prior_alpha, prior_beta, epoch, epochs):
