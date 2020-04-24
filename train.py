@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from src.model.dataset import build_dataset
 
@@ -26,13 +27,16 @@ def train(save_dir='./assets/', model='sbvae', learning_rate=0.003, max_epoch=10
 
 
 
-    scheduler = MultiStepLR(optimizer, milestones=[1], gamma=0.1)
+    #scheduler = MultiStepLR(optimizer, milestones=[1], gamma=0.1)
     epochs = max_epoch
     for epoch in range(1, epochs + 1):
         model.trains(device, train_loader if model != 'sssbvae' else train_loader_occluded, optimizer, epoch, epochs)
         model.tests(device, test_loader if model != 'sssbvae' else test_loader_occluded, epoch, epochs)
-        scheduler.step()
-    torch.save(model.state_dict(), f'{save_dir}data/{name}.pth')
+        #scheduler.step()
+    os.makedirs(f'{save_dir}data/{name}/', exist_ok=True)
+    torch.save(model.state_dict(), f'{save_dir}data/{name}/{name}.pth')
+    model.add_embedding(test_loader)
+    model.visualize_embeddings(-1, f'{save_dir}data/{name}')
 
 
 
@@ -65,7 +69,7 @@ if __name__ == "__main__":
                           help='train for a maximum of N epochs. Default: %(default)s')
 
     optimizer = p.add_argument_group("AdaM Options")
-    optimizer.add_argument('--learning-rate', type=float, default=.003,
+    optimizer.add_argument('--learning-rate', type=float, default=.0003,
                            help="the AdaM learning rate (alpha) parameter. Default:%(default)s")
 
     general = p.add_argument_group("General arguments")

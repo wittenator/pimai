@@ -31,7 +31,7 @@ def test_vae_acc(weights_path, name, train_loader, test_loader):
     with torch.no_grad():
         labels = []
         embs = []
-        for data, label in train_loader:
+        for data, label in test_loader:
             data, label = data.to(device), label.to(device)
             labels.append(label)
             _, a, b, *rest = sbvae(data)
@@ -46,7 +46,7 @@ def test_vae_acc(weights_path, name, train_loader, test_loader):
         knn.fit(emb_train, labels_train)
         accs.append(accuracy_score(labels_test, knn.predict(emb_test)))
 
-    return go.Bar(name=weights_path, x=['n=3', 'n=5', 'n=10'], y=accs)
+    return go.Bar(name=name, x=['n=3', 'n=5', 'n=10'], y=accs)
 
 weights = [
 #"./assets/data/sbvae-100-50--cycle--50--gamma-.pth",
@@ -54,10 +54,10 @@ weights = [
 ("./assets/data/sbvae-500-50--cycle--50--km-.pth", "km + cycle"),
 #"./assets/data/sbvae-100-50--none--50--gamma-.pth",
 #"./assets/data/sbvae-100-50--none--50--gl-.pth",
-#("./assets/data/sbvae-500-50--none--50--km-.pth", "km + none"),
+("./assets/data/sbvae-500-50--none--50--km-.pth", "km + none"),
 #"./assets/data/sbvae-100-50--tanh--50--gamma-.pth",
 #"./assets/data/sbvae-100-50--tanh--50--gl-.pth",
-#("./assets/data/sbvae-500-50--tanh--50--km-.pth", "km + tanh")
+("./assets/data/sbvae-500-50--tanh--50--km-.pth", "km + tanh")
 ]
 traces = [test_vae_acc(*weight, train_loader, test_loader) for weight in weights]
 traces.append(go.Bar(name='km + none (paper)', x=['n=3', 'n=5', 'n=10'], y=[1-0.0934, 1-0.0865, 1-0.0890]))
@@ -71,6 +71,5 @@ fig.update_layout(
     xaxis_title="Number of neighbours for KNN",
     yaxis_title="Accuracy"
 )
-fig.tight_layout()
 fig.show()
-fig.write_image("./fig1.svg")
+fig.write_image("./knn.svg")

@@ -9,6 +9,9 @@ python = "^3.6"
 gradient = "^0.5.1"
 tensorboard = "^2.1"
 hypertools = "^0.6.2"
+plotly = "^4.5"
+psutil = "^5.7"
+requests = "^2.23"
 
 [tool.poetry.dev-dependencies]
 

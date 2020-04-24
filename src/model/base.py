@@ -65,3 +65,20 @@ class Autoencoder(nn.Module):
         else:
             return np.tanh((epoch % self.warmup_period) / (self.warmup_period*0.3))
 
+    def add_embedding(self, loader):
+        with torch.no_grad():
+            labels = []
+            embs = []
+            for data, label in loader:
+                data, label = data.to(self.device), label.to(self.device)
+                labels.append(label)
+                _, a, b, *rest = self(data)
+                emb = self.reparameterize(a,b)
+                embs.append(emb)
+            self.embeddings.append(torch.cat(tuple(embs), dim=0).cpu().numpy())
+            self.embedding_labels = torch.cat(tuple(labels), dim=0).cpu().numpy()
+            
+    def visualize_embeddings(self, epoch, path):
+        import hypertools as hyp
+        hyp.plot(self.embeddings[epoch], '.', hue=self.embedding_labels, reduce='TSNE', ndims=2, save_path=f'{path}/{self.__class__.__name__}-{datetime.now().strftime("%Y%m%d-%H%M%S")}.svg')
+

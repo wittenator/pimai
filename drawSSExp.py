@@ -61,7 +61,7 @@ def test_ssvae_acc(weights_path, name, train_loader, test_loader):
 weights = [
 #"./assets/data/sbvae-100-50--cycle--50--gamma-.pth",
 #"./assets/data/sbvae-100-50--cycle--50--gl-.pth",
-("./assets/data/sssbvae-1-50--cycle--50--km-.pth", "km + none"),
+("./assets/data/sssbvae-1000-50--none--50--km-.pth", "km + none"),
 #"./assets/data/sbvae-100-50--none--50--gamma-.pth",
 #"./assets/data/sbvae-100-50--none--50--gl-.pth",
 #("./assets/data/sbvae-500-50--none--50--km-.pth", "km + none"),
@@ -80,10 +80,10 @@ fig = go.Figure(data=traces)
 # Change the bar mode
 fig.update_layout(barmode='group')
 fig.update_layout(
-    title="MNIST: Accuracy Semi Supervised SB-VAE",
-    xaxis_title="Number of neighbours for KNN",
+    title="MNIST: Accuracy Semi-Supervised SB-VAE",
+    xaxis_title="Percentage of non-occluded labels",
     yaxis_title="Accuracy"
 )
 #fig.tight_layout()
 fig.show()
-fig.write_image("./fig2.svg")
+fig.write_image("./sssbvae.svg")
