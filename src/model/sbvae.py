@@ -27,12 +27,6 @@ class SBVAE(Autoencoder):
         # Sets the function for DNCP
         self.dist = dist
 
-        self.n_samples = 1000
-        self.granularity = 100
-        self.approx_beta = torch.histc(Beta(torch.tensor([0.5]), torch.tensor([0.5])).rsample(torch.tensor([self.n_samples])), bins=self.granularity, min=0, max=1)
-        self.approx_beta = self.approx_beta / self.approx_beta.sum()
-        self.approx_beta = self.approx_beta.unsqueeze(0).expand(128, self.granularity)
-
     def encode(self, x):
         x = torch.flatten(x, 1)
         h1 = F.relu(self.fc1(x))
