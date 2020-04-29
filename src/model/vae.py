@@ -20,14 +20,13 @@ class VAE(Autoencoder):
         return self.fc21(h1), self.fc22(h1)
 
     def reparameterize(self, mu, logvar):
-        self.name = 'Gauss VAE'
         std = torch.exp(0.5 * logvar)
         eps = torch.randn_like(std)
         return mu + eps * std
 
     def decode(self, z):
         h3 = F.relu(self.fc3(z))
-        return torch.sigmoid(self.fc4(h3))
+        return self.fc4(h3)
 
     def forward(self, x):
         mu, logvar = self.encode(x)
@@ -36,7 +35,7 @@ class VAE(Autoencoder):
 
     def loss_function(self, recon_x, x, mu, logvar, epoch, epochs):
         self.counter += 1
-        BCE = F.binary_cross_entropy(recon_x, x.view(-1, 784), reduction='sum')
+        BCE = F.binary_cross_entropy_with_logits(recon_x, x.view(-1, 784), reduction='sum')
 
         # see Appendix B from VAE paper:
         # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
@@ -46,7 +45,7 @@ class VAE(Autoencoder):
         self.writer.add_scalar('KLD/train', KLD.sum(), self.counter)
         self.writer.add_scalar('BCE/train', BCE.sum(), self.counter)
 
-        return BCE + KLD
+        return BCE # + KLD
 
     def compute_loss_train(self, data, target, epoch, epochs):
         recon_batch, mu, logvar = self(data)

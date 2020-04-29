@@ -80,7 +80,6 @@ if __name__ == "__main__":
                          help='name of the folder where to save the experiment. Default: %(default)s.')
 
     args= p.parse_args()
-    torch.autograd.set_detect_anomaly(True)
     train(**vars(args))
 
 
