@@ -64,4 +64,4 @@ fig.update_layout(
     yaxis_title="Accuracy"
 )
 fig.show()
-fig.write_image("./knn.svg")
+fig.write_image("./knn.pdf")

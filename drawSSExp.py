@@ -59,22 +59,14 @@ def test_ssvae_acc(weights_path, name, train_loader, test_loader):
     return re
 
 weights = [
-#"./assets/data/sbvae-100-50--cycle--50--gamma-.pth",
-#"./assets/data/sbvae-100-50--cycle--50--gl-.pth",
-("./assets/data/sssbvae-1000-50--none--50--km-.pth", "km + none"),
-#"./assets/data/sbvae-100-50--none--50--gamma-.pth",
-#"./assets/data/sbvae-100-50--none--50--gl-.pth",
-#("./assets/data/sbvae-500-50--none--50--km-.pth", "km + none"),
-#"./assets/data/sbvae-100-50--tanh--50--gamma-.pth",
-#"./assets/data/sbvae-100-50--tanh--50--gl-.pth",
-#("./assets/data/sbvae-500-50--tanh--50--km-.pth", "km + tanh")
+("./assets/data/sssbvae-50-50--cycle--50--km/sssbvae-50-50--cycle--50--km.pth", "km + cycle")
 ]
 re = [test_ssvae_acc(*weight, train_loader, test_loader) for weight in weights]
 traces = []
-#traces.append(go.Bar(name='km + none (paper)', x=['n=3', 'n=5', 'n=10'], y=[1-0.0934, 1-0.0865, 1-0.0890]))
-traces.append(go.Bar(name='Gauss-DGM (paper)', x=['5%'], y=[1-0.0474]))
-traces.append(go.Bar(name='Semi Supervised SB-VAE', x=['5%'], y=[re[0][1]]))
-traces.append(go.Bar(name='KNN = 5', x=['5%'], y=[re[0][0]]))
+
+traces.append(go.Bar(name='Gauss-DGM (paper)', x=['0.01'], y=[1-0.0474]))
+traces.append(go.Bar(name='Semi Supervised SB-VAE', x=['0.01'], y=[re[0][1]]))
+traces.append(go.Bar(name='KNN = 5', x=['0.01'], y=[re[0][0]]))
 
 fig = go.Figure(data=traces)
 # Change the bar mode
@@ -84,6 +76,6 @@ fig.update_layout(
     xaxis_title="Percentage of non-occluded labels",
     yaxis_title="Accuracy"
 )
-#fig.tight_layout()
+
 fig.show()
-fig.write_image("./sssbvae.svg")
+fig.write_image("./sssbvae.pdf")
