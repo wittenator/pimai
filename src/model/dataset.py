@@ -5,7 +5,7 @@ from torch.utils.data import Subset, DataLoader
 from multiprocessing import cpu_count
 import numpy as np
 
-def build_dataset(path):
+def build_dataset(path, prob):
 
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
@@ -15,7 +15,6 @@ def build_dataset(path):
     mnist_train = datasets.MNIST(f'{path}data', train=True, download=True, transform=transforms.Compose([transforms.ToTensor()]))
     mnist_test = datasets.MNIST(f'{path}data', train=False, transform=transforms.Compose([transforms.ToTensor()]))
 
-    prob = 0.05
     train_occluded = np.array([1] * int(len(mnist_train) * prob) + [0] * int((1 - prob) * len(mnist_train)))
     test_occluded = np.array([1] * int(len(mnist_test) * prob) + [0] * int((1 - prob) * len(mnist_test)))
     np.random.shuffle(train_occluded)

@@ -51,7 +51,7 @@ def test_vae_acc(weights_path, name, train_loader, test_loader):
     return go.Bar(name=name, x=['n=3', 'n=5', 'n=10'], y=accs, text=np.around(accs, 3), textposition='auto')
 
 
-traces = [test_vae_acc(f"./assets/data/sbvae-500-50--{warmup}--50--{method}/sbvae-500-50--{warmup}--50--{method}.pth", f"{method}+{warmup}", train_loader, test_loader) for method, warmup in itertools.product(['km', 'gamma', 'gl'], ['none'])]
+traces = [test_vae_acc(f"./assets/data/sbvae-500-50--{warmup}--50--{method}/sbvae-500-50--{warmup}--50--{method}.pth", f"{method}+{warmup}", train_loader, test_loader) for method, warmup in itertools.product(['km', 'gamma', 'gl'], ['none', 'tanh', 'cycle'])]
 traces.append(go.Bar(name='km + none (paper)', x=['n=3', 'n=5', 'n=10'], y=[1-0.0934, 1-0.0865, 1-0.0890], text=np.around(np.array([1-0.0934, 1-0.0865, 1-0.0890]), 3), textposition='auto'))
 traces.append(go.Bar(name='Gauss VAE (paper)', x=['n=3', 'n=5', 'n=10'], y=[1-0.284, 1-0.2096, 1-0.1533], text=np.around(np.array([1-0.284, 1-0.2096, 1-0.1533]), 3), textposition='auto'))
 

@@ -5,7 +5,7 @@ from .base import Autoencoder
 
 
 class VAE(Autoencoder):
-    def __init__(self, device, save_dir, warmup_method, warmup_period, k=20):
+    def __init__(self, device, save_dir, warmup_method, warmup_period, k=50, dist=None):
         super(VAE, self).__init__(device, save_dir, warmup_method, warmup_period)
 
         self.fc1 = nn.Linear(784, 500)
@@ -45,7 +45,7 @@ class VAE(Autoencoder):
         self.writer.add_scalar('KLD/train', KLD.sum(), self.counter)
         self.writer.add_scalar('BCE/train', BCE.sum(), self.counter)
 
-        return BCE # + KLD
+        return BCE + KLD
 
     def compute_loss_train(self, data, target, epoch, epochs):
         recon_batch, mu, logvar = self(data)

@@ -9,9 +9,11 @@ import torch
 
 import plotly.graph_objects as go 
 
-device, train_loader, test_loader, train_loader_occluded, test_loader_occluded = build_dataset("./assets/")
 
-def test_ssvae_acc(weights_path, name, train_loader, test_loader):
+
+def test_ssvae_acc(weights_path, name, prob, train_loader, test_loader):
+
+    device, train_loader, test_loader, train_loader_occluded, test_loader_occluded = build_dataset("./assets/", prob)
 
     sssbvae = SSSBVAE(device, './assets/data/runs/', "none", 20, k=50).to(device)
     sssbvae.load_state_dict(torch.load(weights_path, map_location=device))
@@ -59,14 +61,16 @@ def test_ssvae_acc(weights_path, name, train_loader, test_loader):
     return re
 
 weights = [
-("./assets/data/sssbvae-50-50--cycle--50--km/sssbvae-50-50--cycle--50--km.pth", "km + cycle")
+("./assets/data/sssbvae-50-50--cycle--50--km--0.01/sssbvae-50-50--cycle--50--km.pth", "km + none", 0.01),
+("./assets/data/sssbvae-50-50--cycle--50--km--0.05/sssbvae-50-50--cycle--50--km.pth", "km + none", 0.01),
+("./assets/data/sssbvae-50-50--cycle--50--km--0.1/sssbvae-50-50--cycle--50--km.pth", "km + none", 0.1)
 ]
 re = [test_ssvae_acc(*weight, train_loader, test_loader) for weight in weights]
 traces = []
 
 traces.append(go.Bar(name='Gauss-DGM (paper)', x=['0.01'], y=[1-0.0474]))
-traces.append(go.Bar(name='Semi Supervised SB-VAE', x=['0.01'], y=[re[0][1]]))
-traces.append(go.Bar(name='KNN = 5', x=['0.01'], y=[re[0][0]]))
+traces.append(go.Bar(name='Semi Supervised SB-VAE', x=['0.01'], y=re[:,1]))
+traces.append(go.Bar(name='KNN = 5', x=['0.01'], y=re[:,0]))
 
 fig = go.Figure(data=traces)
 # Change the bar mode
